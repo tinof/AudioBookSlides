@@ -156,8 +156,14 @@ def main(input_wildcard, output_video, video_format='avi'):
     q = '"' if platform.system() == 'Windows' else "'"
 
     # automatic ffmpeg invocation and cleanup
-    print(f"\nffmpeg -hide_banner -f concat -safe 0 -i {file_list} -c copy {q}{output_video}{q}")
-    os.system(f"ffmpeg  -hide_banner -f concat -safe 0 -i {file_list} -c copy {q}{output_video}{q}")
+    ffmpeg_command = f"ffmpeg -hide_banner -f concat -safe 0 -i {file_list} -c copy {q}{output_video}{q}"
+
+    # Appending NVENC encoding flags to optimize video encoding with NVENC for Windows
+    if platform.system() == 'Windows':
+        ffmpeg_command += " -c:v h264_nvenc -preset p7 -tune hq -b:v 8M"
+
+    print(ffmpeg_command)
+    os.system(ffmpeg_command)
 
     # Check if the output_video file exists
     if os.path.exists(output_video):

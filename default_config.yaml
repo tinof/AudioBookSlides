@@ -118,3 +118,9 @@ use_dictionary: 1
 # Set this value according to your needs, or comment it out to disable volume checking and normalization.
 # If you are hard-of-hearing this may also be of assistance.
 #LUFS_target: -17
+
+# Added hardware configuration for FP8 precision and Windows optimizations
+hardware:
+  mixed_precision: fp8  # Requires CUDA 12.2+
+  cudnn_benchmark: True
+  deterministic_algorithms: False

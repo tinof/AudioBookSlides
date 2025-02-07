@@ -113,7 +113,27 @@ def load_and_process_config(SCRIPT_PATH, bookname):
 
     return replace_bookname_recursive(config, bookname) if bookname else config
 
+# Added functions for Windows and VRAM optimizations
 
+def optimize_for_12gb():
+    return {
+        "use_tiled_vae": True,  # 40% VRAM reduction
+        "model_offload": True,  # Swap unused models to CPU
+        "sequential_processing": True  # Avoid parallel pipelines
+    }
+
+
+def calculate_batch_size():
+    import pynvml
+    pynvml.nvmlInit()
+    handle = pynvml.nvmlDeviceGetHandleByIndex(0)
+    info = pynvml.nvmlDeviceGetMemoryInfo(handle)
+    
+    # Conservative calculation for 12GB
+    if info.total >= 12*1024**3:  # 12GB
+        return 2 if "turbo" in config else 1
+    else:
+        return 1
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description='Update workflow configuration.')

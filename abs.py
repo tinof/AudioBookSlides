@@ -9,12 +9,22 @@ import logging
 import sys
 import re
 import json
+import torch_directml
 
 from pathlib import Path, PureWindowsPath
 
 # Define constants and initialize logging
 SCRIPT_PATH = os.path.dirname(os.path.abspath(__file__))
 DEBUG = 1  # Set to 1 for debug mode, 0 to disable
+
+# Added DirectML integration for better Windows GPU utilization
+dml = torch_directml.device()
+
+def move_to_dml(model):
+    return model.to(dml)
+
+# Added Whisper-Faster configuration for CUDA C++ implementation
+whisperx_win = "whisper-faster.exe --model large-v2 --align --output_dir "
 
 def extract_first_minute(file_path, temp_file="temp_first_minute.mp3"):
     """

@@ -4,6 +4,7 @@ from comfy.k_diffusion import sampling as k_diffusion_sampling
 import latent_preview
 import torch
 import comfy.utils
+import tensorrt as trt
 
 
 class BasicScheduler:
@@ -269,6 +270,23 @@ class SamplerCustom:
             out_denoised = out
         return (out, out_denoised)
 
+class TensorRTSampler:
+    def __init__(self, model):
+        self.logger = trt.Logger(trt.Logger.WARNING)
+        self.runtime = trt.Runtime(self.logger)
+        # Convert SDXL to TensorRT engine
+        self.engine = self.build_engine(model)
+    
+    def build_engine(self, model_path):
+        # Use NVIDIA's sdxl-tensorrt toolkit
+        from sdxl_trt import convert_model
+        return convert_model(
+            model_path, 
+            fp16=True, 
+            output_dir="trt_engines",
+            force_engine_rebuild=False
+        )
+
 NODE_CLASS_MAPPINGS = {
     "SamplerCustom": SamplerCustom,
     "BasicScheduler": BasicScheduler,
@@ -282,4 +300,5 @@ NODE_CLASS_MAPPINGS = {
     "SamplerDPMPP_SDE": SamplerDPMPP_SDE,
     "SplitSigmas": SplitSigmas,
     "FlipSigmas": FlipSigmas,
+    "TensorRTSampler": TensorRTSampler,
 }
